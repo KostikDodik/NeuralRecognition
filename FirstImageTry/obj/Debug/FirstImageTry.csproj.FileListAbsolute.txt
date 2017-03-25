@@ -1,1 +1,9 @@
 E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\bin\Debug\FirstImageTry.exe.config
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\bin\Debug\FirstImageTry.exe
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\bin\Debug\FirstImageTry.pdb
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.csprojResolveAssemblyReference.cache
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.Form1.resources
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.Properties.Resources.resources
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.csproj.GenerateResource.Cache
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.exe
+E:\SMRTNKY\Neural\FirstImageTry\FirstImageTry\obj\Debug\FirstImageTry.pdb
