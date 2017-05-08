@@ -13,38 +13,57 @@ namespace FirstImageTry
 {
     public partial class Form1 : Form
     {
+        private static Random rand = new Random();
+
+
         Neuron[] Inp;
         Neuron[] Outp;
         Neuron[][] Hiden;
 
-        //Parametres of network
-        int countInput = 2;
+        //Parametres of CN Layers
+        int countOfConvolutions = 2;
+        int sizeOfMatrix = 5;
+        int[] kernelsPerConvolution = { 16, 32 };
+        int poolingSize = 4;
+
+        //Parametres of MLP
+        int countInput = 16*32;
         int countOutput = 1;
 
-        int HidenLevels = 2;
-        int countHiden = 4;
-        int countShift = 1;
+        int HidenLevels = 1;
+        int countHiden = 16*32;
+        int countShift = 0; //count of shift neurons in hiden levels
 
-        double E = 0.1; //graduation speed
-        double A = 0.0001; //moment
 
-        Dictionary<double[], double[]> TrainingSet = new Dictionary<double[], double[]>();
-        Dictionary<double[], double[]> TestingSet = new Dictionary<double[], double[]>();
-
-        int epoch = 0;
-        bool reverse = false; //True, if values are >1 and need to normalize em
+        //Parametres of Education
+        double E = 0.5; //graduation speed
+        double A = 0.001; //moment
+        double dropChance = 0.5;
 
         public Form1()
         {
             InitializeComponent();
             InitNeural();
-
             GetTraining();
             GetTesting();
-            int b = 0;
             PerformTest();
+            int[,] a = new int[5, 5];
         }
 
+        #region CNN
+
+
+
+
+        #endregion
+
+        #region MLP
+        Dictionary<double[], double[]> TrainingSet = new Dictionary<double[], double[]>();
+        Dictionary<double[], double[]> TestingSet = new Dictionary<double[], double[]>();
+
+        int epoch = 0;
+        bool reverse = false; //True, if values are >1 and need to normalize em
+        
         public void InitNeural()
         {
             //Creating Levels
@@ -71,7 +90,7 @@ namespace FirstImageTry
             for (int i = 0; i < countInput; i++)
             {
                 Inp[i].next = Hiden[0].Take(countHiden - countShift).ToArray(); //Creating sinapses without next level's shift neurons
-                Inp[i].InitWeights(countHiden);
+                Inp[i].InitWeights(countHiden-countShift);
             }
             for (int j = 0; j < HidenLevels; j++)
                 for (int i = 0; i < countHiden; i++)
@@ -79,7 +98,7 @@ namespace FirstImageTry
                     if (j != HidenLevels - 1)
                     {
                         Hiden[j][i].next = Hiden[j + 1].Take(countHiden-countShift).ToArray(); //Creating sinapses without next level's shift neurons
-                        Hiden[j][i].InitWeights(countHiden);
+                        Hiden[j][i].InitWeights(countHiden-countShift);
                     }
                     else
                     {
@@ -139,6 +158,19 @@ namespace FirstImageTry
             return Result;
         }
 
+        public void DropOut()
+        {
+            for (int j = 0; j < HidenLevels; j++)
+                foreach (var N in Hiden[j])
+                    N.IsDroped = rand.NextDouble() < dropChance;
+        }
+        public void ReturnDrop()
+        {
+            for (int j = 0; j < HidenLevels; j++)
+                foreach (var N in Hiden[j])
+                    N.IsDroped = false;
+        }
+
         public void ChangeDeltas(double[] Ideal)
         {
             for (int i = 0; i < Ideal.Length; i++)
@@ -158,24 +190,22 @@ namespace FirstImageTry
                 Inp[i].DoChange(E, A);
         }
 
-        public void TrainSet(double[] Input, double[] Ideal)
-        {
-            ClearInputs();
-            RunForward(Input);
-            ChangeDeltas(Ideal);
-            DoChanges();
-        }
+        #endregion
+
+        #region Training & Testing
 
         private void GetTesting()
         {
             StreamReader f = new StreamReader(@"Testing.txt");
             ReadSet(TestingSet, f);
         }
+
         private void GetTraining()
         {
             StreamReader f = new StreamReader(@"Training.txt");
             ReadSet(TrainingSet, f);
         }
+
         private void ReadSet(Dictionary<double[], double[]> TargetSet, StreamReader f)
         {
             double[] a;
@@ -196,7 +226,7 @@ namespace FirstImageTry
                 }
                 for (int i = 0; i < countOutput; i++)
                 {
-                    sIndex = buffer.IndexOf(' ');
+                    sIndex = buffer.IndexOfAny(separators);
                     if (sIndex > 0)
                     {
                         t = buffer.Substring(0, sIndex);
@@ -216,6 +246,16 @@ namespace FirstImageTry
             }
         }
 
+        public void TrainSet(double[] Input, double[] Ideal)
+        {
+            ClearInputs();
+            DropOut();
+            RunForward(Input);
+            ChangeDeltas(Ideal);
+            DoChanges();
+            ReturnDrop();
+        }
+
         private void PerformTest()
         {
             Label[] labels = { label1, label2, label3, label4, label5, label6, label7, label8, label9, label10 };
@@ -223,7 +263,7 @@ namespace FirstImageTry
             {
                 string label = "";
                 double MSE = 1;
-                for (int j = 0; j < 10; j++)
+                for (int j = 0; j < 1000; j++)
                 {
                     epoch++;
                     foreach (var key in TrainingSet.Keys)
@@ -236,18 +276,21 @@ namespace FirstImageTry
                     {
                         double a = GetMSE(key, TestingSet[key])[0];
                         temp += a;
-                        t += Math.Round(a, 3).ToString() + "\n";
+                        t += Math.Round(a, 4).ToString() + "\n";
                     }
                     temp /= TestingSet.Count;
                     if (temp < MSE)
                     {
                         MSE = temp;
-                        label = epoch + " epoch\n\n" + Math.Round(MSE, 3).ToString() + "\n\n" + t;
+                        label = epoch + " epoch\n\n" + Math.Round(MSE,4).ToString() + "\n\n" + t;
                     }
                 }
 
                 labels[i].Text = label;
             }
         }
+
+        #endregion
+
     }
 }

@@ -17,6 +17,7 @@ namespace FirstImageTry
         public double input;
         public double delta;
         public bool isShift;
+        public bool IsDroped;
 
         public double sigmoid(double Input)
         {
@@ -25,6 +26,7 @@ namespace FirstImageTry
 
         public void DoJob()
         {
+            if (IsDroped) return;
             if (isShift)
                 value = 1;
             else
@@ -48,7 +50,8 @@ namespace FirstImageTry
         {
             delta = 0;
             for (int i = 0; i < next.Length; i++)
-                delta += weights.ElementAt(i) * next.ElementAt(i).delta;
+                if(!next.ElementAt(i).IsDroped)
+                    delta += weights.ElementAt(i) * next.ElementAt(i).delta;
             delta *= (1 - value) * value;
             return delta;
         }
@@ -61,6 +64,7 @@ namespace FirstImageTry
 
         public void DoChange(double E, double A)
         {
+            if (IsDroped) return;
             for (int i = 0; i < next.Length; i++)
             {
                 changes[i] = E * value * next[i].delta + A * changes[i];
